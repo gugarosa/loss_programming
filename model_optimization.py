@@ -6,7 +6,6 @@ from torch.utils.data import DataLoader
 import utils.loader as l
 import utils.optimizer as o
 import utils.target as t
-from models.mlp import MLP
 
 
 def get_arguments():
@@ -45,15 +44,13 @@ if __name__ == '__main__':
 
     # Creates the iterators
     train_iterator = DataLoader(train, batch_size=128, shuffle=shuffle)
+    val_iterator = DataLoader(val, batch_size=128, shuffle=shuffle)
 
     # Defining the torch seed
     torch.manual_seed(seed)
 
-    # Initializing the model
-    model = MLP()
-
     # Defining the optimization task
-    opt_fn = t.create_loss_function(model, train_iterator, 1)
+    opt_fn = t.loss_function(train_iterator, val_iterator, epochs=1)
 
     # Running the optimization task
     history = o.optimize(opt_fn, 5, 2, 2, 5, 2, 5, ['SUM', 'SUB'], [0, 0], [1, 1], dict())

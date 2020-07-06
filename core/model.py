@@ -2,6 +2,8 @@ import torch
 from torch import nn, optim
 from tqdm import tqdm
 
+from core.losses import WeightedLossAccuracy
+
 
 class Model(torch.nn.Module):
     """A Model class is responsible for customly implementing neural network architectures.
@@ -44,7 +46,7 @@ class Model(torch.nn.Module):
         self.optimizer = optim.Adam(self.parameters(), lr=lr)
 
         # Defines the loss as usual
-        self.loss = nn.NLLLoss()
+        self.loss = WeightedLossAccuracy()
 
         # Check if there is a tuple for the weights initialization
         if self.init_weights:
@@ -58,15 +60,15 @@ class Model(torch.nn.Module):
             # Uses CUDA in the whole class
             self.cuda()
 
-    def step(self, batch, train=True):
+    def step(self, batch, weights, is_training=True):
         """Performs a single batch optimization step.
 
         Args:
             batch (tuple): Tuple containing the batches input (x) and target (y).
-            train (bool): Whether it is a training step or not.
+            is_training (bool): Whether it is a training step or not.
 
         Returns:
-            The loss and accuracy accross the batch.
+            
 
         """
 
@@ -77,27 +79,24 @@ class Model(torch.nn.Module):
         preds = self(x)
 
         # Calculates the batch's loss
-        batch_loss = self.loss(preds, y)
+        batch_loss = self.loss(y, preds, weights)
 
         # Checks if it is a training batch
-        if train:
+        if is_training:
             # Propagates the gradients backward
             batch_loss.backward()
 
             # Perform the parameeters updates
             self.optimizer.step()
 
-        # Calculates the batch's accuracy
-        batch_acc = torch.mean((torch.sum(torch.argmax(preds, dim=1) == y).float()) / x.size(0))
+        return batch_loss.item()
 
-        return batch_loss.item(), batch_acc.item()
-
-    def fit(self, train_iterator, val_iterator=None, epochs=10):
+    def fit(self, train_iterator, weights, epochs=10):
         """Trains the model.
 
         Args:
             train_iterator (torchtext.data.Iterator): Training data iterator.
-            val_iterator (torchtext.data.Iterator): Validation data iterator.
+            
             epochs (int): The maximum number of training epochs.
 
         """
@@ -111,75 +110,54 @@ class Model(torch.nn.Module):
             # Setting the training flag
             self.train()
 
-            # Initializes the loss and accuracy as zero
-            mean_loss, mean_acc = 0.0, 0.0
+            # Initializes the loss as zero
+            mean_loss = 0.0
 
             # For every batch in the iterator
-            for batch in tqdm(train_iterator):
+            for batch in train_iterator:
                 # Resetting the gradients
                 self.optimizer.zero_grad()
 
                 # Calculates the batch's loss
-                loss, acc = self.step(batch)
+                loss = self.step(batch, weights)
 
                 # Summing up batch's loss
                 mean_loss += loss
-
-                # Summing up batch's accuracy
-                mean_acc += acc
 
             # Gets the mean loss across all batches
             mean_loss /= len(train_iterator)
 
-            # Gets the mean accuracy across all batches
-            mean_acc /= len(train_iterator)
+            print(f'train_loss: {mean_loss}')
 
-            print(f'train_loss: {mean_loss} | train_acc: {mean_acc}')
-
-            # If there is a validation iterator
-            if val_iterator:
-                # Evaluates the network
-                self.evaluate(val_iterator, validation=True)
-
-    def evaluate(self, iterator, validation=False):
+    def evaluate(self, iterator, weights):
         """Evaluates the model.
 
         Args:
             iterator (torchtext.data.Iterator): Validation or testing data iterator.
-            validation (bool): Whether it is validation or final evaluation.
 
         """
 
-        # Defines a string to hold the step's identifier
-        step_name = 'Validating' if validation else 'Evaluating'
-
-        print(f'{step_name} model ...')
+        print(f'Evaluating model ...')
 
         # Setting the evalution flag
         self.eval()
 
-        # Initializes the loss and accuracy as zero
-        mean_loss, mean_acc = 0.0, 0.0
+        # Initializes the loss as zero
+        mean_loss = 0.0
 
         # Inhibits the gradient from updating the parameters
         with torch.no_grad():
             # For every batch in the iterator
-            for batch in tqdm(iterator):
+            for batch in iterator:
                 # Calculates the batch's loss
-                loss, acc = self.step(batch, train=False)
+                loss = self.step(batch, weights, is_training=False)
 
                 # Summing up batch's loss
                 mean_loss += loss
 
-                # Summing up batch's accuracy
-                mean_acc += acc
-
         # Gets the mean loss across all batches
         mean_loss /= len(iterator)
 
-        # Gets the mean accuracy across all batches
-        mean_acc /= len(iterator)
+        print(f'eval_loss: {mean_loss}')
 
-        print(f'loss: {mean_loss} | acc: {mean_acc}')
-
-        return mean_loss, mean_acc
+        return mean_loss
