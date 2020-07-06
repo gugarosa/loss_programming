@@ -1,3 +1,8 @@
+# Additional files
+**/*.DS_Store
+*.log*
+.vscode
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
