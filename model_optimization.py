@@ -3,6 +3,7 @@ import argparse
 import torch
 from torch.utils.data import DataLoader
 
+import utils.constraints as c
 import utils.loader as l
 import utils.optimizer as o
 import utils.target as t
@@ -53,4 +54,6 @@ if __name__ == '__main__':
     opt_fn = t.loss_function(train_iterator, val_iterator, epochs=1)
 
     # Running the optimization task
-    history = o.optimize(opt_fn, 5, 2, 2, 5, 2, 5, ['SUM', 'SUB'], [0, 0], [1, 1], dict())
+    history = o.optimize(opt_fn, [c.sum_equals_one], 25, 2, 2, 3, 2, 5, ['SUM', 'SUB', 'MUL', 'DIV'], [0, 0], [1, 1], dict())
+
+    print(history.best_agent[-1])

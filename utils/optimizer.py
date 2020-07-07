@@ -5,7 +5,7 @@ from opytimizer.optimizers.evolutionary.gp import GP
 from opytimizer.spaces.tree import TreeSpace
 
 
-def optimize(target, n_trees, n_terminals, n_variables, n_iterations,
+def optimize(target, constraints, n_trees, n_terminals, n_variables, n_iterations,
              min_depth, max_depth, functions, lb, ub, hyperparams):
     """Abstracts Opytimizer's Genetic Programming into a single method.
 
@@ -36,7 +36,7 @@ def optimize(target, n_trees, n_terminals, n_variables, n_iterations,
     optimizer = GP(hyperparams=hyperparams)
 
     # Creating the Function
-    function = Function(pointer=target)
+    function = Function(pointer=target, constraints=constraints)
 
     # Creating the optimization task
     task = Opytimizer(space=space, optimizer=optimizer, function=function)
