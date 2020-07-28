@@ -1,26 +1,9 @@
-from opytimizer.optimizers.evolutionary.gp import GP
 from opytimizer.spaces.tree import TreeSpace
 
 
-class LossGP(GP):
-    """
-    """
-
-    def __init__(self, algorithm='LossGP', hyperparams=None):
-        """Initialization method.
-
-        Args:
-            algorithm (str): Indicates the algorithm name.
-            hyperparams (dict): Contains key-value parameters to the meta-heuristics.
-
-        """
-
-        # Override its parent class with the receiving arguments
-        super(LossGP, self).__init__(algorithm, hyperparams)
-
-
 class LossTreeSpace(TreeSpace):
-    """
+    """LossTreeSpace implements a loss-based version of the tree search space.
+
     """
 
     def __init__(self, n_trees=1, n_terminals=1, n_variables=1, n_iterations=10,
