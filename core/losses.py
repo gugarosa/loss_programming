@@ -1,8 +1,8 @@
-import torch
 from torch import nn
+import opytimizer.math.random as r
 
 
-class WeightedLossAccuracy:
+class CrossEntropyLoss(nn.CrossEntropyLoss):
     """
     """
 
@@ -10,14 +10,32 @@ class WeightedLossAccuracy:
         """
         """
 
-        #
-        self.loss = nn.CrossEntropyLoss()
+        super(CrossEntropyLoss, self).__init__()
 
-    def __call__(self, y_true, y_pred, weights):
-        #
-        loss = self.loss(y_pred, y_true)
+    def __str__(self):
+        """
+        """
 
-        #
-        acc = torch.mean((torch.sum(torch.argmax(y_pred, dim=1) == y_true).float()) / y_true.size(0))
+        return 'CE'
 
-        return loss
+class ConstantLoss:
+    """
+    """
+
+    def __init__(self):
+        """
+        """
+
+        self.value = r.generate_uniform_random_number(0, 1)[0]
+
+    def __call__(self, *args):
+        """
+        """
+
+        return self.value
+
+    def __str__(self):
+        """
+        """
+
+        return str(round(self.value, 4))
