@@ -1,4 +1,4 @@
-./libraries/opytimizer
+git+https://github.com/gugarosa/opytimizer
 torch>=1.5.0
 torchvision>=0.6.0
 tqdm>=4.46.0

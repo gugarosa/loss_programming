@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 
 import utils.constraints as c
 import utils.loader as l
-import utils.optimizer as o
+import optimization.wrapper as w
 import utils.target as t
 
 
@@ -41,7 +41,7 @@ if __name__ == '__main__':
     seed = args.seed
 
     # Loads the data
-    train, val, test = l.load_dataset(name=dataset)
+    train, val, _ = l.load_dataset(name=dataset)
 
     # Creates the iterators
     train_iterator = DataLoader(train, batch_size=128, shuffle=shuffle)
@@ -54,6 +54,6 @@ if __name__ == '__main__':
     opt_fn = t.loss_function(train_iterator, val_iterator, epochs=1)
 
     # Running the optimization task
-    history = o.optimize(opt_fn, [c.sum_equals_one], 25, 2, 2, 3, 2, 5, ['SUM', 'SUB', 'MUL', 'DIV'], [0, 0], [1, 1], dict())
+    history = w.run(opt_fn, [c.sum_equals_one], 25, 2, 2, 3, 2, 5, ['SUM', 'SUB', 'MUL', 'DIV'], [0, 0], [1, 1], dict())
 
     print(history.best_agent[-1])

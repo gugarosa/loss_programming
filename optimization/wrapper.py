@@ -1,13 +1,11 @@
+from optimization.evolver import LossGP, LossTreeSpace
 from opytimizer import Opytimizer
 from opytimizer.core.function import Function
-from opytimizer.core.optimizer import Optimizer
-from opytimizer.optimizers.evolutionary.gp import GP
-from opytimizer.spaces.tree import TreeSpace
 
 
-def optimize(target, constraints, n_trees, n_terminals, n_variables, n_iterations,
-             min_depth, max_depth, functions, lb, ub, hyperparams):
-    """Abstracts Opytimizer's Genetic Programming into a single method.
+def run(target, constraints, n_trees, n_terminals, n_variables, n_iterations,
+        min_depth, max_depth, functions, lb, ub, hyperparams):
+    """Abstracts Opytimizer's loss-based Genetic Programming into a single method.
 
     Args:
         target (callable): The method to be optimized.
@@ -27,13 +25,13 @@ def optimize(target, constraints, n_trees, n_terminals, n_variables, n_iteration
 
     """
 
-    # Creating the TreeSpace
-    space = TreeSpace(n_trees=n_trees, n_terminals=n_terminals, n_variables=n_variables,
-                      n_iterations=n_iterations, min_depth=min_depth, max_depth=max_depth,
-                      functions=functions, lower_bound=lb, upper_bound=ub)
+    # Creating a loss-based TreeSpace
+    space = LossTreeSpace(n_trees=n_trees, n_terminals=n_terminals, n_variables=n_variables,
+                          n_iterations=n_iterations, min_depth=min_depth, max_depth=max_depth,
+                          functions=functions, lower_bound=lb, upper_bound=ub)
 
-    # Creating GP's optimizer
-    optimizer = GP(hyperparams=hyperparams)
+    # Creating a loss-based GP optimizer
+    optimizer = LossGP(hyperparams=hyperparams)
 
     # Creating the Function
     function = Function(pointer=target, constraints=constraints)
