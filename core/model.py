@@ -60,7 +60,7 @@ class Model(torch.nn.Module):
             # Uses CUDA in the whole class
             self.cuda()
 
-    def step(self, batch, weights, is_training=True):
+    def step(self, batch, is_training=True):
         """Performs a single batch optimization step.
 
         Args:
@@ -68,7 +68,7 @@ class Model(torch.nn.Module):
             is_training (bool): Whether it is a training step or not.
 
         Returns:
-            
+            The batch loss.
 
         """
 
@@ -79,7 +79,7 @@ class Model(torch.nn.Module):
         preds = self(x)
 
         # Calculates the batch's loss
-        batch_loss = self.loss(y, preds, weights)
+        batch_loss = self.loss(y, preds)
 
         # Checks if it is a training batch
         if is_training:
@@ -91,12 +91,11 @@ class Model(torch.nn.Module):
 
         return batch_loss.item()
 
-    def fit(self, train_iterator, weights, epochs=10):
+    def fit(self, train_iterator, epochs=10):
         """Trains the model.
 
         Args:
             train_iterator (torchtext.data.Iterator): Training data iterator.
-            
             epochs (int): The maximum number of training epochs.
 
         """
@@ -119,7 +118,7 @@ class Model(torch.nn.Module):
                 self.optimizer.zero_grad()
 
                 # Calculates the batch's loss
-                loss = self.step(batch, weights)
+                loss = self.step(batch)
 
                 # Summing up batch's loss
                 mean_loss += loss
@@ -129,7 +128,7 @@ class Model(torch.nn.Module):
 
             print(f'train_loss: {mean_loss}')
 
-    def evaluate(self, iterator, weights):
+    def evaluate(self, iterator):
         """Evaluates the model.
 
         Args:
@@ -150,7 +149,7 @@ class Model(torch.nn.Module):
             # For every batch in the iterator
             for batch in iterator:
                 # Calculates the batch's loss
-                loss = self.step(batch, weights, is_training=False)
+                loss = self.step(batch, is_training=False)
 
                 # Summing up batch's loss
                 mean_loss += loss

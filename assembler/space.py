@@ -69,7 +69,8 @@ class LossTreeSpace:
         """
 
         # Creates a list of random trees
-        self.trees = [self.grow(self.min_depth, self.max_depth) for _ in range(self.n_trees)]
+        self.trees = [self.grow(self.min_depth, self.max_depth)
+                      for _ in range(self.n_trees)]
 
         # Applies the first tree as the best one
         self.best_tree = copy.deepcopy(self.trees[0])
@@ -123,8 +124,9 @@ class LossTreeSpace:
             return LossNode(str(loss), 'TERMINAL', loss)
 
         # Generates a node identifier
-        node_id = r.generate_integer_random_number(0, len(self.functions) + self.n_terminals)
-        
+        node_id = r.generate_integer_random_number(
+            0, len(self.functions) + self.n_terminals)
+
         # If the identifier is a terminal
         if node_id >= len(self.functions):
             # Gathers its real identifier

@@ -1,4 +1,5 @@
 import torch
+import numpy as np
 from opytimizer import Opytimizer
 from opytimizer.core.function import Function
 
@@ -6,6 +7,7 @@ from assembler.gp import LossGP
 from assembler.space import LossTreeSpace
 
 torch.manual_seed(0)
+# np.random.seed(0)
 
 x = torch.randn(3, 5)
 y = torch.empty(3, dtype=torch.long).random_(5)
@@ -16,10 +18,10 @@ def func(t):
     return fitness
 
 # Creating a loss-based TreeSpace
-space = LossTreeSpace(n_trees=5, n_terminals=2, min_depth=1, max_depth=5, functions=['SUM', 'SUB', 'MUL', 'DIV'])
+space = LossTreeSpace(n_trees=5, n_terminals=2, n_iterations=100, min_depth=1, max_depth=5, functions=['SUM', 'SUB', 'MUL', 'DIV'])
 
 # Creating a loss-based GP optimizer
-optimizer = LossGP()
+optimizer = LossGP(hyperparams={'p_mutation': 0.5})
 
 # Creating the Function
 function = Function(pointer=func)
@@ -31,4 +33,4 @@ task = Opytimizer(space=space, optimizer=optimizer, function=function)
 history = task.start(store_best_only=True)
 
 print(space.best_tree)
-print(space.best_fit)
+print(space.fits)

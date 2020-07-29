@@ -1,6 +1,7 @@
 # Additional files
 **/*.DS_Store
-*.log*
+*.log
+*.log.*
 .vscode
 data/
 

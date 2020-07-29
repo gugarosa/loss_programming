@@ -22,6 +22,7 @@ class CrossEntropyLoss(nn.CrossEntropyLoss):
 
         return 'CE'
 
+
 class ConstantLoss:
     """ConstantLoss used to defined constant values that may appear in the GP's trees.
 
@@ -29,7 +30,7 @@ class ConstantLoss:
 
     def __init__(self):
         """Initialization method.
-        
+
         """
 
         # Defines a random uniform value between `0` and `1`
@@ -44,7 +45,7 @@ class ConstantLoss:
 
     def __str__(self):
         """String representation.
-        
+
         """
 
         return str(round(self.value, 4))

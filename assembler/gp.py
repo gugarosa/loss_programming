@@ -1,8 +1,15 @@
-import torch
 import copy
-from opytimizer.optimizers.evolutionary.gp import GP
+
+import numpy as np
+import opytimizer.math.general as g
 import opytimizer.utils.decorator as d
 import opytimizer.utils.history as h
+import opytimizer.utils.logging as l
+import torch
+from opytimizer.optimizers.evolutionary.gp import GP
+from tqdm import tqdm
+
+logger = l.get_logger(__name__)
 
 
 class LossGP(GP):
@@ -22,6 +29,113 @@ class LossGP(GP):
         # Override its parent class with the receiving arguments
         super(LossGP, self).__init__(algorithm, hyperparams)
 
+    def _reproduction(self, space):
+        """Reproducts a number of individuals pre-selected through a tournament procedure (p. 99).
+
+        Args:
+            space (TreeSpace): A TreeSpace object.
+
+        """
+
+        # Calculates a list of current trees' fitness
+        fitness = [fit for fit in space.fits]
+
+        # Number of individuals to be reproducted
+        n_individuals = int(space.n_trees * self.p_reproduction)
+
+        # Gathers a list of selected individuals to be replaced
+        selected = g.tournament_selection(fitness, n_individuals)
+
+        # For every selected individual
+        for s in selected:
+            # Gathers the worst individual index
+            worst = np.argmax(fitness)
+
+            # Replace the individual by performing a deep copy on selected tree
+            space.trees[worst] = copy.deepcopy(space.trees[s])
+
+            # Replaces the worst individual fitness with a minimum value
+            fitness[worst] = 0
+
+    def _mutation(self, space):
+        """Mutates a number of individuals pre-selected through a tournament procedure.
+
+        Args:
+            space (TreeSpace): A TreeSpace object.
+
+        """
+
+        # Calculates a list of current trees' fitness
+        fitness = [fit for fit in space.fits]
+
+        # Number of individuals to be mutated
+        n_individuals = int(space.n_trees * self.p_mutation)
+
+        # Gathers a list of selected individuals to be replaced
+        selected = g.tournament_selection(fitness, n_individuals)
+
+        # For every selected individual
+        for s in selected:
+            # Gathers individual number of nodes
+            n_nodes = space.trees[s].n_nodes
+
+            # Checks if the tree has more than one node
+            if n_nodes > 1:
+                # Prunes the amount of maximum nodes
+                max_nodes = self._prune_nodes(n_nodes)
+
+                # Mutatets the individual
+                space.trees[s] = self._mutate(space, space.trees[s], max_nodes)
+
+            # If there is only one node
+            else:
+                # Re-create it with a random tree
+                space.trees[s] = space.grow(space.min_depth, space.max_depth)
+
+    def _crossover(self, space):
+        """Crossover a number of individuals pre-selected through a tournament procedure (p. 101).
+
+        Args:
+            space (TreeSpace): A TreeSpace object.
+            agents (list): Current iteration agents.
+            trees (list): Current iteration trees.
+
+        """
+
+        # Calculates a list of current trees' fitness
+        fitness = [fit for fit in space.fits]
+
+        # Number of individuals to be crossovered
+        n_individuals = int(space.n_trees * self.p_crossover)
+
+        # Checks if `n_individuals` is an odd number
+        if n_individuals % 2 != 0:
+            # If it is, increase it by one
+            n_individuals += 1
+
+        # Gathers a list of selected individuals to be replaced
+        selected = g.tournament_selection(fitness, n_individuals)
+
+        # For every pair in selected individuals
+        for s in g.pairwise(selected):
+            # Calculates the amount of father nodes
+            father_nodes = space.trees[s[0]].n_nodes
+
+            # Calculate the amount of mother nodes
+            mother_nodes = space.trees[s[1]].n_nodes
+
+            # Checks if both trees have more than one node
+            if (father_nodes > 1) and (mother_nodes > 1):
+                # Prunning father nodes
+                max_f_nodes = self._prune_nodes(father_nodes)
+
+                # Prunning mother nodes
+                max_m_nodes = self._prune_nodes(mother_nodes)
+
+                # Apply the crossover operation
+                space.trees[s[0]], space.trees[s[1]] = self._cross(
+                    space.trees[s[0]], space.trees[s[1]], max_f_nodes, max_m_nodes)
+
     @d.pre_evaluation
     def _evaluate(self, space, function):
         """Evaluates the search space according to the objective function.
@@ -32,49 +146,26 @@ class LossGP(GP):
 
         """
 
-        #
+        # For every possible tree
         for i, tree in enumerate(space.trees):
-            #
+            # Evaluates the tree
             fit = function(tree)
 
-            #
+            # If the fitness is a tensor
             if isinstance(fit, torch.Tensor):
-                #
+                # Gathers as a float number
                 fit = fit.item()
 
-            #
+            # Replaces in the space's list of fitness
             space.fits[i] = fit
 
-            #
+            # If current tree's fitness is smaller than best fitness
             if space.fits[i] < space.best_fit:
                 # Makes a deep copy of current tree
                 space.best_tree = copy.deepcopy(tree)
 
                 # Makes a deep copy of the fitness
                 space.best_fit = copy.deepcopy(space.fits[i])
-        
-
-        # # Iterates through all (trees, agents)
-        # for (tree, agent) in zip(space.trees, space.agents):
-        #     # Runs through the tree and returns a position array
-        #     agent.position = copy.deepcopy(tree.position)
-
-        #     # Checks the agent limits
-        #     agent.clip_limits()
-
-        #     # Calculates the fitness value of the agent
-        #     agent.fit = function(agent.position)
-
-        #     # If tree's fitness is better than global fitness
-        #     if agent.fit < space.best_agent.fit:
-        #         # Makes a deep copy of current tree
-        #         space.best_tree = copy.deepcopy(tree)
-
-        #         # Makes a deep copy of agent's position to the best agent
-        #         space.best_agent.position = copy.deepcopy(agent.position)
-
-        #         # Also, copies its fitness from agent's fitness
-        #         space.best_agent.fit = copy.deepcopy(agent.fit)
 
     def run(self, space, function, store_best_only=False, pre_evaluation=None):
         """Runs the optimization pipeline.
@@ -96,28 +187,26 @@ class LossGP(GP):
         # We will define a History object for further dumping
         history = h.History(store_best_only)
 
-        # # Initializing a progress bar
-        # with tqdm(total=space.n_iterations) as b:
-        #     # These are the number of iterations to converge
-        #     for t in range(space.n_iterations):
-        #         logger.file(f'Iteration {t+1}/{space.n_iterations}')
+        # Initializing a progress bar
+        with tqdm(total=space.n_iterations) as b:
+            # These are the number of iterations to converge
+            for t in range(space.n_iterations):
+                logger.file(f'Iteration {t+1}/{space.n_iterations}')
 
-        #         # Updating trees with designed operators
-        #         self._update(space)
+                # Updating trees with designed operators
+                self._update(space)
 
-        #         # After the update, we need to re-evaluate the tree space
-        #         self._evaluate(space, function, hook=pre_evaluation)
+                # After the update, we need to re-evaluate the tree space
+                self._evaluate(space, function, hook=pre_evaluation)
 
-        #         # Every iteration, we need to dump agents and best agent
-        #         history.dump(agents=space.agents,
-        #                      best_agent=space.best_agent,
-        #                      best_tree=space.best_tree)
+                # Every iteration, we need to dump agents and best agent
+                history.dump(best_tree=space.best_tree,
+                             best_fit=space.best_fit)
 
-        #         # Updates the `tqdm` status
-        #         b.set_postfix(fitness=space.best_agent.fit)
-        #         b.update()
+                # Updates the `tqdm` status
+                b.set_postfix(fitness=space.best_fit)
+                b.update()
 
-        #         logger.file(f'Fitness: {space.best_agent.fit}')
-        #         logger.file(f'Position: {space.best_agent.position}')
+                logger.file(f'Fitness: {space.best_fit}')
 
         return history

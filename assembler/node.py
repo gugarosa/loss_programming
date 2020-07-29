@@ -47,11 +47,75 @@ class LossNode:
 
         return '\n' + '\n'.join(lines)
 
+    @property
+    def min_depth(self):
+        """int: Minimum depth of node.
+
+        """
+
+        return _properties(self)['min_depth']
+
+    @property
+    def max_depth(self):
+        """int: Maximum depth of node.
+
+        """
+
+        return _properties(self)['max_depth']
+
+    @property
+    def n_leaves(self):
+        """int: Number of leaves node.
+
+        """
+
+        return _properties(self)['n_leaves']
+
+    @property
+    def n_nodes(self):
+        """int: Number of nodes.
+
+        """
+
+        return _properties(self)['n_nodes']
+
+    @property
+    def pre_order(self):
+        """list: Traverses the nodes in pre-order.
+
+        """
+
+        # Creates a list for outputting the nodes
+        pre_order = []
+
+        # Creates a list to hold the stacked nodes
+        stacked = [self]
+
+        # While there is more than one node
+        while len(stacked) > 0:
+            # Pops the list and gets the node
+            node = stacked.pop()
+
+            # Appends to the pre-order
+            pre_order.append(node)
+
+            # If there is a child in the right
+            if node.right is not None:
+                # Appends the child
+                stacked.append(node.right)
+
+            # If there is a child in the left
+            if node.left is not None:
+                # Appends the child
+                stacked.append(node.left)
+
+        return pre_order
+
     def evaluate(self, *args):
         """Evaluates a node and outputs its solution.
 
         Args:
-            node (Node): An instance of the Node class (can be a tree of Nodes).
+            node (LossNode): An instance of the LossNode class (can be a tree of LossNodes).
 
         Returns:
             An output solution.
@@ -101,7 +165,7 @@ def _build_string(node):
         https://github.com/joowani/binarytree/blob/master/binarytree/__init__.py#L153
 
     Args:
-        node (Node): An instance of the Node class (can be a tree of Nodes).
+        node (LossNode): An instance of the LossNode class (can be a tree of LossNodes).
 
     Returns:
         A formatted string.
@@ -227,10 +291,10 @@ def _evaluate(node, *args):
     """Evaluates a node and outputs its solution array.
 
     Args:
-        node (Node): An instance of the Node class (can be a tree of Nodes).
+        node (LossNode): An instance of the LossNode class (can be a tree of LossNodes).
 
     Returns:
-        An output solution of size (n_variables x n_dimensions).
+        An output solution.
 
     """
 
@@ -289,3 +353,71 @@ def _evaluate(node, *args):
     # If the node does not exists
     else:
         return None
+
+
+def _properties(node):
+    """Traverses the nodes and returns some useful properties.
+
+    Args:
+        node (LossNode): An instance of the LossNode class (can be a tree of LossNodes).
+
+    Returns:
+        A dictionary containing some useful properties: `min_depth`, `max_depth`,
+        `n_leaves` and `n_nodes`.
+
+    """
+
+    # Initializing minimum depth as 0
+    min_depth = 0
+
+    # Initializing maximum depth as -1
+    max_depth = -1
+
+    # Initializing number of leaves and nodes as 0
+    n_leaves = n_nodes = 0
+
+    # Gathering a list of possible nodes
+    nodes = [node]
+
+    # While there is a nonde
+    while len(nodes) > 0:
+        # Maximum depth increases by 1
+        max_depth += 1
+
+        # Creates a list for further nodes
+        next_nodes = []
+
+        # For each node in the current ones
+        for n in nodes:
+            # Increases the number of nodes
+            n_nodes += 1
+
+            # If the node is a leaf
+            if n.left is None and n.right is None:
+                # If minimum depth is equal to 0
+                if min_depth == 0:
+                    # Minimum depth will be equal to maximum depth
+                    min_depth = max_depth
+
+                # Increases the number of leaves by 1
+                n_leaves += 1
+
+            # If there is a child in the left
+            if n.left is not None:
+                # Appends the left child node
+                next_nodes.append(n.left)
+
+            # If there is a child in the right
+            if n.right is not None:
+                # Appends the right child node
+                next_nodes.append(n.right)
+
+        # Current nodes will receive the list of the next depth
+        nodes = next_nodes
+
+    return {
+        'min_depth': min_depth,
+        'max_depth': max_depth,
+        'n_leaves': n_leaves,
+        'n_nodes': n_nodes
+    }
