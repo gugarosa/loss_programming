@@ -1,4 +1,4 @@
-import opytimizer.math.random as r
+import torch
 from torch import nn
 
 
@@ -23,7 +23,7 @@ class CrossEntropyLoss(nn.CrossEntropyLoss):
         return 'CE'
 
 
-class ConstantLoss:
+class ConstantLoss(nn.Module):
     """ConstantLoss used to defined constant values that may appear in the GP's trees.
 
     """
@@ -33,19 +33,30 @@ class ConstantLoss:
 
         """
 
-        # Defines a random uniform value between `0` and `1`
-        self.value = r.generate_uniform_random_number(0, 1)[0]
+        # Overrides the parent class
+        super(ConstantLoss, self).__init__()
 
-    def __call__(self, *args):
-        """Callable whenever this class is called.
+        # Defines a random uniform value between `0` and `1`
+        self.value = torch.tensor(torch.rand(1), requires_grad=True)
+
+    def forward(self, y_preds, y_true):
+        """Forward pass.
+
+        Args:
+            y_preds (torch.Tensor): Predictions.
+            y_true (torch.Tensor): True labels.
+
+        Returns:
+            The constant value between `0` and `1`.
 
         """
-
+        
         return self.value
+        
 
     def __str__(self):
         """String representation.
 
         """
 
-        return str(round(self.value, 4))
+        return str(round(self.value.item(), 4))

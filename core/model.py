@@ -43,8 +43,6 @@ class Model(torch.nn.Module):
         # Defining an optimizer
         self.optimizer = optim.Adam(self.parameters(), lr=lr)
 
-        self.loss = nn.CrossEntropyLoss()
-
         # Check if there is a tuple for the weights initialization
         if self.init_weights:
             # Iterate over all possible parameters
@@ -76,7 +74,7 @@ class Model(torch.nn.Module):
         preds = self(x)
 
         # Calculates the batch's loss
-        batch_loss = self.loss(y, preds)
+        batch_loss = self.loss.evaluate(preds, y)
 
         # Checks if it is a training batch
         if is_training:
@@ -86,7 +84,10 @@ class Model(torch.nn.Module):
             # Perform the parameeters updates
             self.optimizer.step()
 
-        return batch_loss.item()
+        # Calculates the batch's accuracy
+        batch_acc = torch.mean((torch.sum(torch.argmax(preds, dim=1) == y).float()) / x.size(0))
+
+        return batch_loss.item(), batch_acc.item()
 
     def fit(self, train_iterator, epochs=10):
         """Trains the model.
@@ -106,8 +107,8 @@ class Model(torch.nn.Module):
             # Setting the training flag
             self.train()
 
-            # Initializes the loss as zero
-            mean_loss = 0.0
+            # Initializes the loss and accuracy as zero
+            mean_loss, mean_acc = 0.0, 0.0
 
             # For every batch in the iterator
             for batch in train_iterator:
@@ -115,15 +116,21 @@ class Model(torch.nn.Module):
                 self.optimizer.zero_grad()
 
                 # Calculates the batch's loss
-                loss = self.step(batch)
+                loss, acc = self.step(batch)
 
                 # Summing up batch's loss
                 mean_loss += loss
 
+                # Summing up batch's accuracy
+                mean_acc += acc
+
             # Gets the mean loss across all batches
             mean_loss /= len(train_iterator)
 
-            print(f'train_loss: {mean_loss}')
+            # Gets the mean accuracy across all batches
+            mean_acc /= len(train_iterator)
+
+            print(f'train_loss: {mean_loss} | train_acc: {mean_acc}')
 
     def evaluate(self, iterator):
         """Evaluates the model.
@@ -138,22 +145,28 @@ class Model(torch.nn.Module):
         # Setting the evalution flag
         self.eval()
 
-        # Initializes the loss as zero
-        mean_loss = 0.0
+        # Initializes the loss and accuracy as zero
+        mean_loss, mean_acc = 0.0, 0.0
 
         # Inhibits the gradient from updating the parameters
         with torch.no_grad():
             # For every batch in the iterator
             for batch in iterator:
-                # Calculates the batch's loss
-                loss = self.step(batch, is_training=False)
+                # Calculates the batch's loss and accuracy
+                loss, acc = self.step(batch, is_training=False)
 
                 # Summing up batch's loss
                 mean_loss += loss
 
+                # Summing up batch's accuracy
+                mean_acc += acc
+
         # Gets the mean loss across all batches
         mean_loss /= len(iterator)
 
-        print(f'eval_loss: {mean_loss}')
+        # Gets the mean accuracy across all batches
+        mean_acc /= len(iterator)
 
-        return mean_loss
+        print(f'val_loss: {mean_loss} | val_acc: {mean_acc}')
+
+        return mean_loss, mean_acc

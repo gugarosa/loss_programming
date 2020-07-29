@@ -23,18 +23,20 @@ def validate_losses(train_iterator, val_iterator, epochs=10):
             
         """
 
+        print(loss)
+
         # Initializing the model
         model = MLP()
 
         # Gathers the loss function
-        # model.loss = loss
+        model.loss = loss
 
         # Fits the model
         model.fit(train_iterator, epochs)
 
         # Evaluates the model
-        eval_loss = model.evaluate(val_iterator)
+        _, acc = model.evaluate(val_iterator)
 
-        return eval_loss
+        return 1 - acc
 
     return f
