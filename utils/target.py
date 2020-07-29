@@ -1,32 +1,39 @@
 from models.mlp import MLP
 
 
-def loss_function(train_iterator, val_iterator, epochs=10):
-    """
+def validate_losses(train_iterator, val_iterator, epochs=10):
+    """Trains a model using the provided loss function and validates it.
 
     Args:
+        train_iterator (torchtext.data.Iterator): Training data iterator.
+        val_iterator (torchtext.data.Iterator): Validation data iterator.
+        epochs (int): Number of training epochs.
 
     """
 
-    def f(w):
-        """
+    def f(loss):
+        """Initializes the model, applies the loss, fits the training data
+        and evaluates the validation data.
 
         Args:
-            w (float): Array of variables.
+            loss (LossNode): Tree composed of LossNodes.
 
         Returns:
+            1 - validation accuracy.
             
-
         """
 
         # Initializing the model
         model = MLP()
 
-        #
-        model.fit(train_iterator, w, epochs)
+        # Gathers the loss function
+        # model.loss = loss
 
-        #
-        eval_loss = model.evaluate(val_iterator, w)
+        # Fits the model
+        model.fit(train_iterator, epochs)
+
+        # Evaluates the model
+        eval_loss = model.evaluate(val_iterator)
 
         return eval_loss
 

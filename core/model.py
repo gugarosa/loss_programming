@@ -2,8 +2,6 @@ import torch
 from torch import nn, optim
 from tqdm import tqdm
 
-from core.losses import WeightedLossAccuracy
-
 
 class Model(torch.nn.Module):
     """A Model class is responsible for customly implementing neural network architectures.
@@ -45,8 +43,7 @@ class Model(torch.nn.Module):
         # Defining an optimizer
         self.optimizer = optim.Adam(self.parameters(), lr=lr)
 
-        # Defines the loss as usual
-        self.loss = WeightedLossAccuracy()
+        self.loss = nn.CrossEntropyLoss()
 
         # Check if there is a tuple for the weights initialization
         if self.init_weights:
