@@ -1,6 +1,7 @@
 import torch
-from evolver.space import LossTreeSpace
 from opytimizer.spaces.tree import TreeSpace
+
+from assembler.space import LossTreeSpace
 
 torch.manual_seed(0)
 

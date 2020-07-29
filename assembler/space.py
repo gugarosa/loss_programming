@@ -1,9 +1,11 @@
 import copy
+
 import opytimizer.math.random as r
 import opytimizer.utils.constants as c
 from opytimizer.core.space import Space
+
 import core.losses as l
-from evolver.node import LossNode
+from assembler.node import LossNode
 
 
 class LossTreeSpace:
@@ -28,6 +30,12 @@ class LossTreeSpace:
         # Number of trees
         self.n_trees = n_trees
 
+        # List of fitness
+        self.fits = [c.FLOAT_MAX for _ in range(n_trees)]
+
+        # Best fitness value
+        self.best_fit = c.FLOAT_MAX
+
         # Number of terminal nodes
         self.n_terminals = n_terminals
 
@@ -45,6 +53,9 @@ class LossTreeSpace:
 
         # Creating the trees
         self._create_trees()
+
+        # Defining flag for later use
+        self.built = True
 
     def _create_trees(self):
         """Creates a list of random trees using `GROW` algorithm.
@@ -64,12 +75,24 @@ class LossTreeSpace:
         self.best_tree = copy.deepcopy(self.trees[0])
 
     def _get_loss(self, terminal):
-        """
+        """Gets a loss function based on an identifier.
+
+        Args:
+            terminal (int): Identifier of the loss function.
+
+        Returns:
+            A loss function.
+
         """
 
+        # If terminal equals to `0`
         if terminal == 0:
+            # Returns the CrossEntropyLoss
             return l.CrossEntropyLoss()
+
+        # If terminal equal to `1`
         if terminal == 1:
+            # Returns a ConstantLoss value
             return l.ConstantLoss()
 
     def grow(self, min_depth=1, max_depth=3):
@@ -93,10 +116,10 @@ class LossTreeSpace:
             # Generates a terminal identifier
             terminal_id = r.generate_integer_random_number(0, self.n_terminals)
 
-            #
+            # Gathers the loss based on the terminal identifier
             loss = self._get_loss(terminal_id)
 
-            # Return the terminal node with its id and corresponding position
+            # Return the terminal node with its id and corresponding loss
             return LossNode(str(loss), 'TERMINAL', loss)
 
         # Generates a node identifier
@@ -107,10 +130,10 @@ class LossTreeSpace:
             # Gathers its real identifier
             terminal_id = node_id - len(self.functions)
 
-            #
+            # Gathers the loss based on the terminal identifier
             loss = self._get_loss(terminal_id)
 
-            # Return the terminal node with its id and corresponding position
+            # Return the terminal node with its id and corresponding loss
             return LossNode(str(loss), 'TERMINAL', loss)
 
         # Generates a new function node

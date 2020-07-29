@@ -1,6 +1,7 @@
-import torch
 import numpy as np
-from evolver.node import LossNode
+import torch
+
+from assembler.node import LossNode
 
 torch.manual_seed(0)
 

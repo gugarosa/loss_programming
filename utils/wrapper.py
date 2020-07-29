@@ -1,6 +1,7 @@
-from optimization.evolver import LossGP, LossTreeSpace
 from opytimizer import Opytimizer
 from opytimizer.core.function import Function
+
+from optimization.assembler import LossGP, LossTreeSpace
 
 
 def run(target, constraints, n_trees, n_terminals, n_variables, n_iterations,
