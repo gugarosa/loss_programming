@@ -38,6 +38,6 @@ def run(target, n_trees, n_terminals, n_iterations,
     task = Opytimizer(space=space, optimizer=optimizer, function=function)
 
     # Initializing task
-    history = task.start(store_best_only=True)
+    history = task.start()
 
     return history

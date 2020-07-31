@@ -54,7 +54,4 @@ class MLP(Model):
         x = F.relu(self.fc1(x))
         x = self.fc2(x)
 
-        # Applies the softmax function to the outputs
-        x = F.softmax(x, dim=1)
-
         return x

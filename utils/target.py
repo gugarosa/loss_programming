@@ -1,13 +1,14 @@
 from models.mlp import MLP
 
 
-def validate_losses(train_iterator, val_iterator, epochs=10):
+def validate_losses(train_iterator, val_iterator, epochs=1, device='cpu'):
     """Trains a model using the provided loss function and validates it.
 
     Args:
         train_iterator (torchtext.data.Iterator): Training data iterator.
         val_iterator (torchtext.data.Iterator): Validation data iterator.
         epochs (int): Number of training epochs.
+        device (str): Device used to train the model ('cpu' or 'cuda').
 
     """
 
@@ -23,10 +24,8 @@ def validate_losses(train_iterator, val_iterator, epochs=10):
             
         """
 
-        print(loss)
-
         # Initializing the model
-        model = MLP()
+        model = MLP(device=device)
 
         # Gathers the loss function
         model.loss = loss

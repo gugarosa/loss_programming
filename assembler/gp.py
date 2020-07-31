@@ -199,7 +199,7 @@ class LossGP(GP):
                 # After the update, we need to re-evaluate the tree space
                 self._evaluate(space, function, hook=pre_evaluation)
 
-                # Every iteration, we need to dump agents and best agent
+                # Every iteration, we need the best tree and its fitness
                 history.dump(best_tree=space.best_tree,
                              best_fit=space.best_fit)
 
