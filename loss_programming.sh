@@ -1,29 +1,29 @@
 # Defining the dataset to be used
-DATA="mnist"
+DATA="barrett-miccai"
 
 # Batch size
-BATCH_SIZE=128
+BATCH_SIZE=8
 
 # Number of input units
-N_INPUT=784
+N_INPUT=49152
 
 # Number of hidden units
-N_HIDDEN=128
+N_HIDDEN=4096
 
 # Number of classes
-N_CLASSES=10
+N_CLASSES=2
 
 # Learning rate
-LR=0.001
+LR=0.0001
 
 # Epochs
-EPOCHS=3
+EPOCHS=5
 
 # Number of agents
-N_AGENTS=5
+N_AGENTS=1
 
 # Number of iterations
-N_ITER=10
+N_ITER=1
 
 # Minimum depth of trees
 MIN_DEPTH=1
@@ -32,7 +32,7 @@ MIN_DEPTH=1
 MAX_DEPTH=5
 
 # Number of runnings
-N_RUNS=25
+N_RUNS=1
 
 # Creating a loop
 for i in $(seq 1 $N_RUNS); do

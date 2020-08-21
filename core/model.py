@@ -75,6 +75,7 @@ class Model(torch.nn.Module):
 
         # Calculates the batch's loss
         batch_loss = self.loss.evaluate(preds, y)
+        # batch_loss = self.loss(preds, y)
 
         # Checks if it is a training batch
         if is_training:

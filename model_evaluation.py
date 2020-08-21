@@ -80,6 +80,7 @@ if __name__ == '__main__':
 
     # Gathers the loss function
     model.loss = h.best_tree[-1]
+    # model.loss = torch.nn.CrossEntropyLoss()
 
     # Fits the model
     model.fit(train_iterator, epochs)
