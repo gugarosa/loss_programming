@@ -19,9 +19,17 @@ def get_arguments():
     # Creates the ArgumentParser
     parser = argparse.ArgumentParser(usage='Optimizes a Machine Learning model with GP-based losses.')
 
-    parser.add_argument('dataset', help='Dataset identifier', choices=['mnist', 'fmnist', 'kmnist'])
+    parser.add_argument('dataset', help='Dataset identifier', choices=['mnist', 'fmnist', 'kmnist', 'barrett-miccai', 'barrett-augsburg'])
 
     parser.add_argument('-batch_size', help='Batch size', type=int, default=128)
+
+    parser.add_argument('-n_input', help='Number of input units', type=int, default=784)
+
+    parser.add_argument('-n_hidden', help='Number of hidden units', type=int, default=128)
+
+    parser.add_argument('-n_classes', help='Number of classes', type=int, default=10)
+
+    parser.add_argument('-lr', help='Learning rate', type=float, default=0.001)
 
     parser.add_argument('-epochs', help='Number of training epochs', type=int, default=3)
 
@@ -49,7 +57,11 @@ if __name__ == '__main__':
     # Gathering common variables
     dataset = args.dataset
     batch_size = args.batch_size
+    n_input = args.n_input
+    n_hidden = args.n_hidden
+    n_classes = args.n_classes
     epochs = args.epochs
+    lr = args.lr
     n_agents = args.n_agents
     n_iterations = args.n_iter
     min_depth = args.min_depth
@@ -69,7 +81,7 @@ if __name__ == '__main__':
     torch.manual_seed(seed)
 
     # Defining the optimization task
-    opt_fn = t.validate_losses(train_iterator, val_iterator, epochs=epochs, device=device)
+    opt_fn = t.validate_losses(train_iterator, val_iterator, n_input, n_hidden, n_classes, lr, epochs, device)
 
     # Running the optimization task
     history = w.run(opt_fn, n_trees=n_agents, n_terminals=2, n_iterations=n_iterations,

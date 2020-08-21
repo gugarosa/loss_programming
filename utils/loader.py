@@ -9,7 +9,35 @@ DATASETS = {
 }
 
 
-def load_tv_dataset(name='mnist', val_split=0.2, seed=0):
+def load_barrett_dataset(folder, val_split):
+    """Loads the barrett's dataset from file.
+
+    Args:
+        folder (str): Dataset's folder path.
+        val_split (float): Percentage of split for the validation set.
+
+    Returns:
+        Training, validation and testing sets of loaded dataset.
+
+    """
+
+    # Creating the dataset
+    dataset = tv.datasets.ImageFolder(root=folder,
+                                      transform=tv.transforms.Compose([
+                                          tv.transforms.Resize((128, 128)),
+                                          tv.transforms.ToTensor(),
+                                          tv.transforms.Normalize(
+                                              (0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+                                      ]))
+
+    # Splitting the training data into training/validation
+    train, val, test = torch.utils.data.random_split(
+        dataset, [int(len(dataset) * (1 - (2 * val_split))), int(len(dataset) * val_split), int(len(dataset) * val_split)])
+
+    return train, val, test
+
+
+def load_tv_dataset(name='mnist', val_split=0.25, seed=0):
     """Loads a torchvision dataset.
 
     Args:
@@ -19,11 +47,17 @@ def load_tv_dataset(name='mnist', val_split=0.2, seed=0):
 
     Returns:
         Training, validation and testing sets of loaded dataset.
-        
+
     """
 
     # Defining the torch seed
     torch.manual_seed(seed)
+
+    # Checks if it is supposed to load barrett's dataset
+    if name == 'barrett-miccai':
+        return load_barrett_dataset('data/MICCAI', val_split)
+    elif name == 'barrett-augsburg':
+        return load_barrett_dataset('data/AUGSBURG', val_split)
 
     # Loads the training data
     train = DATASETS[name](root='./data', train=True, download=True,
