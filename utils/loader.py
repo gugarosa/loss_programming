@@ -9,12 +9,13 @@ DATASETS = {
 }
 
 
-def load_dataset(name='mnist', val_split=0.2):
-    """Loads an input dataset.
+def load_tv_dataset(name='mnist', val_split=0.2, seed=0):
+    """Loads a torchvision dataset.
 
     Args:
         name (str): Name of dataset to be loaded.
         val_split (float): Percentage of split for the validation set.
+        seed (int): Randomness seed.
 
     Returns:
         Training, validation and testing sets of loaded dataset.
@@ -22,7 +23,7 @@ def load_dataset(name='mnist', val_split=0.2):
     """
 
     # Defining the torch seed
-    torch.manual_seed(0)
+    torch.manual_seed(seed)
 
     # Loads the training data
     train = DATASETS[name](root='./data', train=True, download=True,
