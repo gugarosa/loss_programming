@@ -62,7 +62,7 @@ python model_optimization.py -h
 
 ### Evaluate the Optimized Loss Function
 
-After conducting the optimization task, one needs to evaluate the created loss function using training and testing sets. Please, use the following scripts to accomplish such a procedure:
+After conducting the optimization task, one needs to evaluate the created loss function using training and testing sets. Please, use the following script to accomplish such a procedure:
 
 ```Python
 python model_evaluation.py -h
@@ -73,7 +73,7 @@ python model_evaluation.py -h
 Instead of invoking every script to conduct the experiments, it is also possible to use the provided shell script, as follows:
 
 ```Bash
-./loss_programming.sh
+./pipeline.sh
 ```
 
 Such a script will conduct every step needed to accomplish the experimentation used throughout this paper. Furthermore, one can change any input argument that is defined in the script.
