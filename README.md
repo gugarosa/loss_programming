@@ -44,7 +44,7 @@ pip install -r requirements.txt
 
 ### Data configuration
 
-Please [download](http://recogna.tech/files/loss_programming/data.tar.gz) the datasets in the OPF file format and then put them on a `data/` folder.
+If you wish to download the medical-based datasets, please contact us. Otherwise, you can use `torchvision` to load pre-implemented datasets.
 
 ---
 
