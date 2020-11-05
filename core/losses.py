@@ -22,6 +22,20 @@ class CrossEntropyLoss(nn.CrossEntropyLoss):
 
         return 'CE'
 
+    def evaluate(self, preds, y):
+        """Wraps usual loss forward pass into an evaluation function.
+
+        Args:
+            preds (torch.Tensor): Tensor with inputs.
+            y (torch.Tensor): Tensor with targets.
+
+        Returns:
+            The forward function of PyTorch's loss.
+        
+        """
+
+        return self.forward(preds, y)
+
 
 class ConstantLoss(nn.Module):
     """ConstantLoss used to defined constant values that may appear in the GP's trees.

@@ -5,7 +5,7 @@ import opytimizer.utils.constants as c
 from opytimizer.core.space import Space
 
 import core.losses as l
-from assembler.node import LossNode
+from core.linker.node import LossNode
 
 
 class LossTreeSpace:

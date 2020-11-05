@@ -6,8 +6,10 @@ from opytimizer.utils.history import History
 from torch.utils.data import DataLoader
 
 import utils.loader as l
+import utils.object as o
 import utils.target as t
 import utils.wrapper as w
+from core.losses import CrossEntropyLoss
 from models.mlp import MLP
 
 
@@ -20,9 +22,13 @@ def get_arguments():
     """
 
     # Creates the ArgumentParser
-    parser = argparse.ArgumentParser(usage='Evaluates a Machine Learning model with GP-based best loss.')
+    parser = argparse.ArgumentParser(usage='Evaluates a Machine Learning model with GP-based best loss or traditional loss.')
 
-    parser.add_argument('dataset', help='Dataset identifier', choices=['mnist', 'fmnist', 'kmnist', 'barrett-miccai', 'barrett-augsburg'])
+    parser.add_argument('dataset', help='Dataset identifier', choices=['mnist', 'fmnist', 'kmnist',
+                                                                       'barrett-miccai', 'barrett-augsburg',
+                                                                       'exudate'])
+
+    parser.add_argument('model', help='Model identifier', choices=['mlp', 'resnet'])
 
     parser.add_argument('-batch_size', help='Batch size', type=int, default=128)
 
@@ -49,8 +55,9 @@ if __name__ == '__main__':
     # Gathers the input arguments
     args = get_arguments()
 
-    # Gathering common variables
+    # Transforms arguments into variables
     dataset = args.dataset
+    name = args.model
     batch_size = args.batch_size
     n_input = args.n_input
     n_hidden = args.n_hidden
@@ -63,24 +70,25 @@ if __name__ == '__main__':
 
     # Loads the optimization history
     h = History()
-    h.load(f'outputs/{dataset}_{seed}.pkl')
+    #h.load(f'outputs/{dataset}_{seed}.pkl')
 
     # Loads the data
-    train, _, test = l.load_tv_dataset(name=dataset, seed=seed)
+    train, _, test = l.load_dataset(name=dataset, seed=seed)
 
     # Creates the iterators
     train_iterator = DataLoader(train, batch_size=batch_size, shuffle=shuffle)
     test_iterator = DataLoader(test, batch_size=batch_size, shuffle=shuffle)
 
-    # Defining the torch seed
+    # Defines the torch seed
     torch.manual_seed(seed)
 
     # Initializing the model
-    model = MLP(n_input=n_input, n_hidden=n_hidden, n_classes=n_classes, lr=lr, device=device)
+    model_obj = o.get_model(name).obj
+    model = model_obj(n_input=n_input, n_hidden=n_hidden, n_classes=n_classes, lr=lr, init_weights=None, device=device)
 
-    # Gathers the loss function
-    model.loss = h.best_tree[-1]
-    # model.loss = torch.nn.CrossEntropyLoss()
+    # Gathers the loss function (replace line below for changing to a standard loss)
+    #model.loss = h.best_tree[-1]
+    model.loss = CrossEntropyLoss()
 
     # Fits the model
     model.fit(train_iterator, epochs)

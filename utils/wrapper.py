@@ -1,8 +1,8 @@
 from opytimizer import Opytimizer
 from opytimizer.core.function import Function
 
-from assembler.gp import LossGP
-from assembler.space import LossTreeSpace
+from core.linker.gp import LossGP
+from core.linker.space import LossTreeSpace
 
 
 def run(target, n_trees, n_terminals, n_iterations,

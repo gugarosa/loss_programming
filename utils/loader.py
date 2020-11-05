@@ -9,8 +9,8 @@ DATASETS = {
 }
 
 
-def load_barrett_dataset(folder, val_split):
-    """Loads the barrett's dataset from file.
+def load_dataset_from_folder(folder, val_split):
+    """Loads a dataset from a folder of images.
 
     Args:
         folder (str): Dataset's folder path.
@@ -37,8 +37,8 @@ def load_barrett_dataset(folder, val_split):
     return train, val, test
 
 
-def load_tv_dataset(name='mnist', val_split=0.25, seed=0):
-    """Loads a torchvision dataset.
+def load_dataset(name='mnist', val_split=0.25, seed=0):
+    """Loads a dataset.
 
     Args:
         name (str): Name of dataset to be loaded.
@@ -53,11 +53,13 @@ def load_tv_dataset(name='mnist', val_split=0.25, seed=0):
     # Defining the torch seed
     torch.manual_seed(seed)
 
-    # Checks if it is supposed to load barrett's dataset
+    # Checks if it is supposed to load custom datasets
     if name == 'barrett-miccai':
-        return load_barrett_dataset('data/MICCAI', val_split)
+        return load_dataset_from_folder('data/MICCAI', val_split)
     elif name == 'barrett-augsburg':
-        return load_barrett_dataset('data/AUGSBURG', val_split)
+        return load_dataset_from_folder('data/AUGSBURG', val_split)
+    elif name =='exudate':
+        return load_dataset_from_folder('data/EXUDATE', val_split)
 
     # Loads the training data
     train = DATASETS[name](root='./data', train=True, download=True,

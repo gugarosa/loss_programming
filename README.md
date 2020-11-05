@@ -15,7 +15,7 @@ If you use our work to fulfill any of your needs, please cite us:
 
 ## Structure
 
- * `assembler`
+ * `linker`
    * `gp.py`: Provides a customized Genetic Programming implementation that can use loss functions as terminals;
    * `node.py`: Provides a customized node structure that can use loss functions as terminals;
    * `space.py`: Provides a customized tree space that can use loss functions as terminals;
