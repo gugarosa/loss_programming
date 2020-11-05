@@ -1,7 +1,7 @@
 import torch
 import torchvision as tv
 
-# A constant used to hold a dictionary of possible datasets
+# Constant used to hold a dictionary of possible datasets
 DATASETS = {
     'mnist': tv.datasets.MNIST,
     'fmnist': tv.datasets.FashionMNIST,
@@ -26,13 +26,13 @@ def load_dataset_from_folder(folder, val_split):
                                       transform=tv.transforms.Compose([
                                           tv.transforms.Resize((128, 128)),
                                           tv.transforms.ToTensor(),
-                                          tv.transforms.Normalize(
-                                              (0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+                                          tv.transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
                                       ]))
 
     # Splitting the training data into training/validation
-    train, val, test = torch.utils.data.random_split(
-        dataset, [int(len(dataset) * (1 - (2 * val_split))), int(len(dataset) * val_split), int(len(dataset) * val_split)])
+    train, val, test = torch.utils.data.random_split(dataset, [int(len(dataset) * (1 - (2 * val_split))),
+                                                               int(len(dataset) * val_split),
+                                                               int(len(dataset) * val_split)])
 
     return train, val, test
 
@@ -66,8 +66,8 @@ def load_dataset(name='mnist', val_split=0.25, seed=0):
                            transform=tv.transforms.ToTensor())
 
     # Splitting the training data into training/validation
-    train, val = torch.utils.data.random_split(
-        train, [int(len(train) * (1 - val_split)), int(len(train) * val_split)])
+    train, val = torch.utils.data.random_split(train, [int(len(train) * (1 - val_split)),
+                                                       int(len(train) * val_split)])
 
     # Loads the testing data
     test = DATASETS[name](root='./data', train=False, download=True,

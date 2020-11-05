@@ -42,11 +42,11 @@ def get_arguments():
 
     parser.add_argument('-epochs', help='Number of training epochs', type=int, default=3)
 
-    parser.add_argument('-shuffle', help='Whether data should be shuffled or not', type=bool, default=True)
-
     parser.add_argument('-device', help='CPU or GPU usage', choices=['cpu', 'cuda'], default='cpu')
 
     parser.add_argument('-seed', help='Seed identifier', type=int, default=0)
+
+    parser.add_argument('--shuffle', help='Whether data should be shuffled or not', action='store_true')
 
     return parser.parse_args()
 
@@ -64,13 +64,13 @@ if __name__ == '__main__':
     n_classes = args.n_classes
     lr = args.lr
     epochs = args.epochs
-    shuffle = args.shuffle
     device = args.device
     seed = args.seed
+    shuffle = args.shuffle
 
     # Loads the optimization history
     h = History()
-    #h.load(f'outputs/{dataset}_{seed}.pkl')
+    h.load(f'outputs/{dataset}_{seed}.pkl')
 
     # Loads the data
     train, _, test = l.load_dataset(name=dataset, seed=seed)
@@ -87,8 +87,9 @@ if __name__ == '__main__':
     model = model_obj(n_input=n_input, n_hidden=n_hidden, n_classes=n_classes, lr=lr, init_weights=None, device=device)
 
     # Gathers the loss function (replace line below for changing to a standard loss)
-    #model.loss = h.best_tree[-1]
-    model.loss = CrossEntropyLoss()
+    # model.loss = CrossEntropyLoss()
+    model.loss = h.best_tree[-1]
+    print(model.loss)
 
     # Fits the model
     model.fit(train_iterator, epochs)

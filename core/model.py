@@ -111,7 +111,7 @@ class Model(torch.nn.Module):
             mean_loss, mean_acc = 0.0, 0.0
 
             # For every batch in the iterator
-            for batch in train_iterator:
+            for batch in tqdm(train_iterator):
                 # Resetting the gradients
                 self.optimizer.zero_grad()
 
@@ -151,7 +151,7 @@ class Model(torch.nn.Module):
         # Inhibits the gradient from updating the parameters
         with torch.no_grad():
             # For every batch in the iterator
-            for batch in iterator:
+            for batch in tqdm(iterator):
                 # Calculates the batch's loss and accuracy
                 loss, acc = self.step(batch, is_training=False)
 

@@ -4,6 +4,7 @@ import torch
 from torch.utils.data import DataLoader
 
 import utils.loader as l
+import utils.object as o
 import utils.target as t
 import utils.wrapper as w
 
@@ -19,7 +20,11 @@ def get_arguments():
     # Creates the ArgumentParser
     parser = argparse.ArgumentParser(usage='Optimizes a Machine Learning model with GP-based losses.')
 
-    parser.add_argument('dataset', help='Dataset identifier', choices=['mnist', 'fmnist', 'kmnist', 'barrett-miccai', 'barrett-augsburg'])
+    parser.add_argument('dataset', help='Dataset identifier', choices=['mnist', 'fmnist', 'kmnist',
+                                                                       'barrett-miccai', 'barrett-augsburg',
+                                                                       'exudate'])
+
+    parser.add_argument('model', help='Model identifier', choices=['mlp', 'resnet'])
 
     parser.add_argument('-batch_size', help='Batch size', type=int, default=128)
 
@@ -41,11 +46,11 @@ def get_arguments():
 
     parser.add_argument('-max_depth', help='Maximum depth of trees', type=int, default=5)
 
-    parser.add_argument('-shuffle', help='Whether data should be shuffled or not', type=bool, default=True)
-
     parser.add_argument('-device', help='CPU or GPU usage', choices=['cpu', 'cuda'])
 
     parser.add_argument('-seed', help='Seed identifier', type=int, default=0)
+
+    parser.add_argument('--shuffle', help='Whether data should be shuffled or not', action='store_true')
 
     return parser.parse_args()
 
@@ -54,8 +59,9 @@ if __name__ == '__main__':
     # Gathers the input arguments
     args = get_arguments()
 
-    # Gathering common variables
+    # Transforms arguments into variables
     dataset = args.dataset
+    name = args.model
     batch_size = args.batch_size
     n_input = args.n_input
     n_hidden = args.n_hidden
@@ -66,12 +72,12 @@ if __name__ == '__main__':
     n_iterations = args.n_iter
     min_depth = args.min_depth
     max_depth = args.max_depth
-    shuffle = args.shuffle
     device = args.device
     seed = args.seed
+    shuffle = args.shuffle
 
     # Loads the data
-    train, val, _ = l.load_tv_dataset(name=dataset, seed=seed)
+    train, val, _ = l.load_dataset(name=dataset, seed=seed)
 
     # Creates the iterators
     train_iterator = DataLoader(train, batch_size=batch_size, shuffle=shuffle)
@@ -80,8 +86,11 @@ if __name__ == '__main__':
     # Defining the torch seed
     torch.manual_seed(seed)
 
+    # Gathers the model object
+    model = o.get_model(name).obj
+
     # Defining the optimization task
-    opt_fn = t.validate_losses(train_iterator, val_iterator, n_input, n_hidden, n_classes, lr, epochs, device)
+    opt_fn = t.validate_losses(train_iterator, val_iterator, model, n_input, n_hidden, n_classes, lr, epochs, device)
 
     # Running the optimization task
     history = w.run(opt_fn, n_trees=n_agents, n_terminals=2, n_iterations=n_iterations,
