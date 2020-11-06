@@ -148,6 +148,9 @@ class LossGP(GP):
 
         # For every possible tree
         for i, tree in enumerate(space.trees):
+            # Loggs out tree for debugging purpose
+            logger.debug(tree)
+
             # Evaluates the tree
             fit = function(tree)
 
