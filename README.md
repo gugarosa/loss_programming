@@ -15,18 +15,21 @@ If you use our work to fulfill any of your needs, please cite us:
 
 ## Structure
 
- * `linker`
-   * `gp.py`: Provides a customized Genetic Programming implementation that can use loss functions as terminals;
-   * `node.py`: Provides a customized node structure that can use loss functions as terminals;
-   * `space.py`: Provides a customized tree space that can use loss functions as terminals;
+ 
  * `core`
+   * `linker`
+     * `gp.py`: Provides a customized Genetic Programming implementation that can use loss functions as terminals;
+     * `node.py`: Provides a customized node structure that can use loss functions as terminals;
+     * `space.py`: Provides a customized tree space that can use loss functions as terminals;
    * `losses.py`: Defines the losses functions that Genetic Programming can uses;
    * `model.py`: Defines the base Machine Learning architecture;
  * `models`
+   * `cnn.py`: Defines a ResNet18 architecture;
    * `mlp.py`: Defines the Multi-Layer Perceptron;
  * `outputs`: Folder that holds the output files, such as `.pkl` and `.txt`;
  * `utils`
    * `loader.py`: Utility to load datasets and split them into training, validation and testing sets;
+   * `object.py`: Wraps objects for usage in command line;
    * `target.py`: Implements the objective functions to be optimized;
    * `wrapper.py`: Wraps the optimization task into a single method.
    
